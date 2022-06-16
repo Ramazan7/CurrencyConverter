@@ -11,8 +11,9 @@ class ViewController: UIViewController {
 
     var currencyData = [structJson]()
 
-    var rub:Double = 0
-    var uzs:Double = 0
+    var rub:Double = 55
+    var uzs:Double = 11110
+    let formatted = NumberFormatter()
     // form elements
     let mainCurrencyTitle = UILabel()
     let refreshCurrencyButton = UIButton()
@@ -37,6 +38,9 @@ class ViewController: UIViewController {
     }
     
     func settingFormElements(){
+        
+        formatted.numberStyle = .decimal
+        formatted.usesGroupingSeparator = true
         
         mainCurrencyTitle.text = "RUB: \(String(format:"%.2f", rub))   UZS \(String(format:"%.2f", uzs))"
         refreshCurrencyButton.setImage(UIImage(systemName: "arrow.clockwise"), for: .normal)
@@ -99,7 +103,6 @@ class ViewController: UIViewController {
         rub = currencyData[0].result
         downloadJSON(checkCurrency: "UZS")
         uzs = currencyData[0].result
-
         mainCurrencyTitle.text = "RUB: \(String(format:"%.2f", rub))   UZS \(String(format:"%.2f", uzs))"
        // rubTitle.text = String(format:"%.2f",rub)
        // uzsTitle.text = String(format:"%.2f",uzs)
@@ -111,9 +114,10 @@ class ViewController: UIViewController {
         if let valueUSD = Double(usdField.text!){
         let rubResult = rub * valueUSD
         let uzsResult = uzs * valueUSD
-        
-            rubField.text = String(format:"%.2f", rubResult)
-            uzsField.text = String(format:"%.2f", uzsResult)
+            
+           
+            rubField.text = formatted.string(from:rubResult as NSNumber)
+            uzsField.text = formatted.string(from: uzsResult as NSNumber)
         }
         else {
             usdField.text = ""
@@ -131,8 +135,8 @@ class ViewController: UIViewController {
             let usdResult = valueUSD / rub
             let uzsResult = (uzs / rub) * valueUSD
             
-            usdField.text = String(format:"%.2f", usdResult)
-            uzsField.text = String(format:"%.2f", uzsResult)
+            usdField.text = formatted.string(from: usdResult as NSNumber)
+            uzsField.text = formatted.string(from: uzsResult as NSNumber)
             }
             else {
                 usdField.text = ""
@@ -146,8 +150,8 @@ class ViewController: UIViewController {
                 let usdResult = valueUSD / uzs
                 let rubResult = (rub / uzs) * valueUSD
                 
-                usdField.text = String(format:"%.2f", usdResult)
-                rubField.text = String(format:"%.2f", rubResult)
+                usdField.text = formatted.string(from: usdResult as NSNumber)
+                rubField.text = formatted.string(from: rubResult as NSNumber)
                 }
                 else {
                     usdField.text = ""
