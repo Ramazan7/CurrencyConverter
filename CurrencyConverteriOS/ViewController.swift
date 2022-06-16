@@ -11,10 +11,11 @@ class ViewController: UIViewController {
 
     var currencyData = [structJson]()
 
-    var rub:Double = 56.649735
-    var uzs:Double = 10966.483482
+    var rub:Double = 0
+    var uzs:Double = 0
     // form elements
     let mainCurrencyTitle = UILabel()
+    let refreshCurrencyButton = UIButton()
     
     let stackviewEnterFields = UIStackView()
     let usdTitle = UILabel()
@@ -26,12 +27,7 @@ class ViewController: UIViewController {
         
     override func viewDidLoad() {
         super.viewDidLoad()
-        /*
-        downloadJSON(checkCurrency: "RUB")
-        rub = currencyData[0].result
-        downloadJSON(checkCurrency: "UZS")
-        uzs = currencyData[0].result */
-        
+       
         
         
         settingFormElements()
@@ -43,6 +39,8 @@ class ViewController: UIViewController {
     func settingFormElements(){
         
         mainCurrencyTitle.text = "RUB: \(String(format:"%.2f", rub))   UZS \(String(format:"%.2f", uzs))"
+        refreshCurrencyButton.setImage(UIImage(systemName: "arrow.clockwise"), for: .normal)
+        refreshCurrencyButton.addTarget(.none, action: #selector(refreshButton), for: .touchUpInside)
         
         stackviewEnterFields.axis = .vertical
         stackviewEnterFields.spacing = 20
@@ -51,12 +49,15 @@ class ViewController: UIViewController {
         rubTitle.text  = "RUB"
         uzsTitle.text   = "UZS"
         
+        usdField.keyboardType = .numberPad
         usdField.placeholder = "0"
         usdField.textAlignment = .right
         usdField.addTarget(.none, action: #selector(usdChangeField), for: .editingChanged)
+        rubField.keyboardType = .numberPad
         rubField.placeholder = "0"
         rubField.textAlignment = .right
         rubField.addTarget(.none, action: #selector(rubChangeField), for: .editingChanged)
+        uzsField.keyboardType = .numberPad
         uzsField.placeholder = "0"
         uzsField.textAlignment = .right
         uzsField.addTarget(.none, action: #selector(uzsChangeField), for: .editingChanged)
@@ -66,6 +67,7 @@ class ViewController: UIViewController {
 
     func addSubviews(){
         view.addSubview(mainCurrencyTitle)
+        view.addSubview(refreshCurrencyButton)
         
         view.addSubview(stackviewEnterFields)
         stackviewEnterFields.addArrangedSubview(usdTitle)
@@ -80,12 +82,28 @@ class ViewController: UIViewController {
         mainCurrencyTitle.translatesAutoresizingMaskIntoConstraints = false
         mainCurrencyTitle.topAnchor.constraint(equalTo: view.topAnchor, constant: 50).isActive = true
         mainCurrencyTitle.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 30).isActive = true
+        refreshCurrencyButton.translatesAutoresizingMaskIntoConstraints = false
+        refreshCurrencyButton.topAnchor.constraint(equalTo: mainCurrencyTitle.topAnchor).isActive = true
+        refreshCurrencyButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -20).isActive = true
         
         stackviewEnterFields.translatesAutoresizingMaskIntoConstraints = false
         stackviewEnterFields.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         stackviewEnterFields.topAnchor.constraint(equalTo: mainCurrencyTitle.bottomAnchor, constant: 30).isActive = true
         stackviewEnterFields.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -20).isActive = true
         stackviewEnterFields.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -70).isActive = true
+    }
+    
+    @objc func refreshButton(){
+
+        downloadJSON(checkCurrency: "RUB")
+        rub = currencyData[0].result
+        downloadJSON(checkCurrency: "UZS")
+        uzs = currencyData[0].result
+
+        mainCurrencyTitle.text = "RUB: \(String(format:"%.2f", rub))   UZS \(String(format:"%.2f", uzs))"
+       // rubTitle.text = String(format:"%.2f",rub)
+       // uzsTitle.text = String(format:"%.2f",uzs)
+
     }
     
     
@@ -147,8 +165,6 @@ class ViewController: UIViewController {
     
     func downloadJSON(checkCurrency:String) {
         
-        //checkRUB
-        
         let semaphore = DispatchSemaphore (value: 0)
 
         let url = "https://api.apilayer.com/exchangerates_data/convert?to=\(checkCurrency)&from=USD&amount=1"
@@ -161,7 +177,7 @@ class ViewController: UIViewController {
             print(String(describing: error))
             return
           }
-          print(String(data: data, encoding: .utf8)!)
+         // print(String(data: data, encoding: .utf8)!)
             do {
                 let currencyDataa = try JSONDecoder().decode(structJson.self, from: data)
                 self.currencyData = [currencyDataa]
