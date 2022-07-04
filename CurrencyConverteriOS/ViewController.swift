@@ -11,8 +11,9 @@ class ViewController: UIViewController {
 
     var currencyData = [structJson]()
 
-    var rub:Double = 55
-    var uzs:Double = 11110
+    var rub:Double = 0
+    var uzs:Double = 0
+    var dateCurrency = "0000-00-00"
     let formatted = NumberFormatter()
     // form elements
     let mainCurrencyTitle = UILabel()
@@ -42,7 +43,8 @@ class ViewController: UIViewController {
         formatted.numberStyle = .decimal
         formatted.usesGroupingSeparator = true
         
-        mainCurrencyTitle.text = "RUB: \(String(format:"%.2f", rub))   UZS \(String(format:"%.2f", uzs))"
+        mainCurrencyTitle.numberOfLines = 0
+        mainCurrencyTitle.text = "RUB: \(String(format:"%.2f", rub))   UZS \(String(format:"%.2f", uzs)) \n DATE: \(dateCurrency)"
         refreshCurrencyButton.setImage(UIImage(systemName: "arrow.clockwise"), for: .normal)
         refreshCurrencyButton.addTarget(.none, action: #selector(refreshButton), for: .touchUpInside)
         
@@ -99,11 +101,17 @@ class ViewController: UIViewController {
     
     @objc func refreshButton(){
 
-        downloadJSON(checkCurrency: "RUB")
-        rub = currencyData[0].result
-        downloadJSON(checkCurrency: "UZS")
-        uzs = currencyData[0].result
-        mainCurrencyTitle.text = "RUB: \(String(format:"%.2f", rub))   UZS \(String(format:"%.2f", uzs))"
+        self.mainCurrencyTitle.text = "Update...Wait.."
+        DispatchQueue.main.async { [self] in
+            downloadJSON(checkCurrency: "RUB")
+                    rub = currencyData[0].result
+                    downloadJSON(checkCurrency: "UZS")
+                    uzs = currencyData[0].result
+            dateCurrency = currencyData[0].date
+                    mainCurrencyTitle.text = "RUB: \(String(format:"%.2f", rub))   UZS \(String(format:"%.2f", uzs)) \n DATE: \(dateCurrency)"
+        }
+        
+        
        // rubTitle.text = String(format:"%.2f",rub)
        // uzsTitle.text = String(format:"%.2f",uzs)
 
