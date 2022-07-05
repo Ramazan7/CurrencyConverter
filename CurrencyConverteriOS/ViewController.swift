@@ -40,6 +40,8 @@ class ViewController: UIViewController {
     
     func settingFormElements(){
         
+        // header
+        
         formatted.numberStyle = .decimal
         formatted.usesGroupingSeparator = true
         
@@ -67,6 +69,11 @@ class ViewController: UIViewController {
         uzsField.placeholder = "0"
         uzsField.textAlignment = .right
         uzsField.addTarget(.none, action: #selector(uzsChangeField), for: .editingChanged)
+        
+        
+        //numbers
+        
+        
         
     }
 
