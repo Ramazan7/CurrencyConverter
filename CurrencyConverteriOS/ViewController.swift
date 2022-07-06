@@ -26,15 +26,18 @@ class ViewController: UIViewController {
     let rubField = UITextField()
     let uzsTitle = UILabel()
     let uzsField = UITextField()
+    
+    let clearValueButton = UIButton()
+    let deleteValueButton = UIButton()
         
     override func viewDidLoad() {
         super.viewDidLoad()
-       
-        
-        
+        overrideUserInterfaceStyle = .dark
         settingFormElements()
         addSubviews()
         addConstraints()
+        
+        addingNumbers()
         // Do any additional setup after loading the view.
     }
     
@@ -73,6 +76,18 @@ class ViewController: UIViewController {
         
         //numbers
         
+        clearValueButton.setImage(UIImage(systemName: "clear"), for: .normal)
+        clearValueButton.addTarget(.none, action: #selector(clearValueButtonAction), for: .touchUpInside)
+        clearValueButton.imageView?.layer.transform = CATransform3DMakeScale(2, 2, 0)
+        clearValueButton.tintColor = .orange
+        deleteValueButton.setImage(UIImage(systemName: "delete.backward"), for: .normal)
+        deleteValueButton.addTarget(.none, action: #selector(deleteValueButtonAction), for: .touchUpInside)
+        deleteValueButton.tintColor = .orange
+        deleteValueButton.imageView?.layer.transform = CATransform3DMakeScale(2, 2, 0)
+        
+        //let zeroButton = UIButton()
+        
+        
         
         
     }
@@ -89,6 +104,11 @@ class ViewController: UIViewController {
         stackviewEnterFields.addArrangedSubview(rubField)
         stackviewEnterFields.addArrangedSubview(uzsTitle)
         stackviewEnterFields.addArrangedSubview(uzsField)
+        
+        view.addSubview(clearValueButton)
+        view.addSubview(deleteValueButton)
+        
+        
     }
     
     func addConstraints(){
@@ -104,6 +124,20 @@ class ViewController: UIViewController {
         stackviewEnterFields.topAnchor.constraint(equalTo: mainCurrencyTitle.bottomAnchor, constant: 30).isActive = true
         stackviewEnterFields.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -20).isActive = true
         stackviewEnterFields.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -70).isActive = true
+        
+        clearValueButton.translatesAutoresizingMaskIntoConstraints = false
+        clearValueButton.heightAnchor.constraint(equalToConstant: 150).isActive = true
+        clearValueButton.widthAnchor.constraint(equalToConstant: 70).isActive = true
+        clearValueButton.topAnchor.constraint(equalTo: stackviewEnterFields.bottomAnchor, constant: 50).isActive = true
+        clearValueButton.rightAnchor.constraint(equalTo: stackviewEnterFields.rightAnchor).isActive = true
+        
+        deleteValueButton.translatesAutoresizingMaskIntoConstraints = false
+        deleteValueButton.heightAnchor.constraint(equalToConstant: 150).isActive = true
+        deleteValueButton.widthAnchor.constraint(equalToConstant: 70).isActive = true
+        deleteValueButton.topAnchor.constraint(equalTo: clearValueButton.bottomAnchor, constant: 20).isActive = true
+        deleteValueButton.rightAnchor.constraint(equalTo: stackviewEnterFields.rightAnchor).isActive = true
+        
+        
     }
     
     @objc func refreshButton(){
@@ -208,6 +242,76 @@ class ViewController: UIViewController {
 
         task.resume()
         semaphore.wait()
+    }
+    
+    @objc func clearValueButtonAction(){
+        
+        if usdField.isEditing {
+            usdField.text?.removeAll()
+        } else if rubField.isEditing {
+            rubField.text?.removeAll()
+        } else if uzsField.isEditing {
+            uzsField.text?.removeAll()
+        }
+    }
+    
+    @objc func deleteValueButtonAction(){
+        
+        if usdField.isEditing {
+            usdField.text?.removeLast()
+        } else if rubField.isEditing {
+            rubField.text?.removeLast()
+        } else if uzsField.isEditing {
+            uzsField.text?.removeLast()
+        }
+    }
+    
+    func addingNumbers(){
+        var topButtons = 50
+        var leftButtons = 20
+        let heightButtons = 70
+        let widthButtons = 70
+        for i in 1...11 {
+            let button = UIButton()
+            button.setTitle(String(i), for: .normal)
+            button.titleLabel?.font = UIFont.init(name: (button.titleLabel?.font.fontName)!, size: 33)
+            view.addSubview(button)
+            
+            button.translatesAutoresizingMaskIntoConstraints = false
+            
+            
+            if i % 3 == 0{
+                
+                button.leftAnchor.constraint(equalTo: view.leftAnchor, constant: CGFloat(leftButtons)).isActive = true
+                button.topAnchor.constraint(equalTo: stackviewEnterFields.bottomAnchor, constant: CGFloat(topButtons)).isActive = true
+                button.widthAnchor.constraint(equalToConstant: CGFloat(widthButtons)).isActive = true
+                button.heightAnchor.constraint(equalToConstant: CGFloat(heightButtons)).isActive = true
+                topButtons = topButtons + heightButtons + 20
+                leftButtons = 20
+                
+            } else if i == 10 {
+                button.setTitle("0", for: .normal)
+                button.leftAnchor.constraint(equalTo: view.leftAnchor, constant: CGFloat(leftButtons)).isActive = true
+                button.topAnchor.constraint(equalTo: stackviewEnterFields.bottomAnchor, constant: CGFloat(topButtons)).isActive = true
+                button.widthAnchor.constraint(equalToConstant: CGFloat(widthButtons * 2 + 20)).isActive = true
+                button.heightAnchor.constraint(equalToConstant: CGFloat(heightButtons)).isActive = true
+                leftButtons = widthButtons * 2 + 60
+            } else if i == 11 {
+                button.setTitle(".", for: .normal)
+                button.leftAnchor.constraint(equalTo: view.leftAnchor, constant: CGFloat(leftButtons)).isActive = true
+                button.topAnchor.constraint(equalTo: stackviewEnterFields.bottomAnchor, constant: CGFloat(topButtons)).isActive = true
+                button.widthAnchor.constraint(equalToConstant: CGFloat(widthButtons)).isActive = true
+                button.heightAnchor.constraint(equalToConstant: CGFloat(heightButtons)).isActive = true
+            } else {
+                button.leftAnchor.constraint(equalTo: view.leftAnchor, constant: CGFloat(leftButtons)).isActive = true
+                button.topAnchor.constraint(equalTo: stackviewEnterFields.bottomAnchor, constant: CGFloat(topButtons)).isActive = true
+                button.widthAnchor.constraint(equalToConstant: CGFloat(widthButtons)).isActive = true
+                button.heightAnchor.constraint(equalToConstant: CGFloat(heightButtons)).isActive = true
+                leftButtons = leftButtons + widthButtons + 20
+                
+                
+            }
+        }
     }
 }
 
