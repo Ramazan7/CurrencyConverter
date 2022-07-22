@@ -8,9 +8,9 @@
 import UIKit
 
 class ViewController: UIViewController {
-
+    
     var currencyData = [structJson]()
-
+    
     var rub:Double = 0
     var uzs:Double = 0
     var dateCurrency = "0000-00-00"
@@ -29,15 +29,18 @@ class ViewController: UIViewController {
     
     let clearValueButton = UIButton()
     let deleteValueButton = UIButton()
-        
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         overrideUserInterfaceStyle = .dark
+        
+        
         settingFormElements()
         addSubviews()
         addConstraints()
         
         addingNumbers()
+        usdField.becomeFirstResponder()
         // Do any additional setup after loading the view.
     }
     
@@ -56,9 +59,13 @@ class ViewController: UIViewController {
         stackviewEnterFields.axis = .vertical
         stackviewEnterFields.spacing = 20
         
-        usdTitle.text   = "USD"
-        rubTitle.text  = "RUB"
-        uzsTitle.text   = "UZS"
+        usdTitle.text = "USD"
+        rubTitle.text = "RUB"
+        uzsTitle.text = "UZS"
+        
+        usdField.inputView = UIView()
+        rubField.inputView = UIView()
+        uzsField.inputView = UIView()
         
         usdField.keyboardType = .numberPad
         usdField.placeholder = "0"
@@ -76,23 +83,21 @@ class ViewController: UIViewController {
         
         //numbers
         
-        clearValueButton.setImage(UIImage(systemName: "clear"), for: .normal)
+//        clearValueButton.setImage(UIImage(systemName: "paintbrush"), for: .normal)
+        clearValueButton.setTitle("AC", for: .normal)
+        clearValueButton.titleLabel?.font = UIFont.systemFont(ofSize: 27, weight: .medium)
         clearValueButton.addTarget(.none, action: #selector(clearValueButtonAction), for: .touchUpInside)
         clearValueButton.imageView?.layer.transform = CATransform3DMakeScale(2, 2, 0)
-        clearValueButton.tintColor = .orange
+        clearValueButton.setTitleColor(.red, for: .normal)
         deleteValueButton.setImage(UIImage(systemName: "delete.backward"), for: .normal)
         deleteValueButton.addTarget(.none, action: #selector(deleteValueButtonAction), for: .touchUpInside)
-        deleteValueButton.tintColor = .orange
+        deleteValueButton.tintColor = .red
         deleteValueButton.imageView?.layer.transform = CATransform3DMakeScale(2, 2, 0)
-        
-        //let zeroButton = UIButton()
-        
-        
         
         
     }
-
-
+    
+    
     func addSubviews(){
         view.addSubview(mainCurrencyTitle)
         view.addSubview(refreshCurrencyButton)
@@ -141,31 +146,31 @@ class ViewController: UIViewController {
     }
     
     @objc func refreshButton(){
-
+        
         self.mainCurrencyTitle.text = "Update...Wait.."
         DispatchQueue.main.async { [self] in
             downloadJSON(checkCurrency: "RUB")
-                    rub = currencyData[0].result
-                    downloadJSON(checkCurrency: "UZS")
-                    uzs = currencyData[0].result
+            rub = currencyData[0].result
+            downloadJSON(checkCurrency: "UZS")
+            uzs = currencyData[0].result
             dateCurrency = currencyData[0].date
-                    mainCurrencyTitle.text = "RUB: \(String(format:"%.2f", rub))   UZS \(String(format:"%.2f", uzs)) \n DATE: \(dateCurrency)"
+            mainCurrencyTitle.text = "RUB: \(String(format:"%.2f", rub))   UZS \(String(format:"%.2f", uzs)) \n DATE: \(dateCurrency)"
+            refreshCurrencyInformation()
         }
         
         
-       // rubTitle.text = String(format:"%.2f",rub)
-       // uzsTitle.text = String(format:"%.2f",uzs)
-
+        // rubTitle.text = String(format:"%.2f",rub)
+        // uzsTitle.text = String(format:"%.2f",uzs)
+        
     }
     
     
     @objc func usdChangeField(){
         if let valueUSD = Double(usdField.text!){
-        let rubResult = rub * valueUSD
-        let uzsResult = uzs * valueUSD
+            let rubResult = rub * valueUSD
+            let uzsResult = uzs * valueUSD
             
-           
-            rubField.text = formatted.string(from:rubResult as NSNumber)
+            rubField.text = formatted.string(from: rubResult as NSNumber)
             uzsField.text = formatted.string(from: uzsResult as NSNumber)
         }
         else {
@@ -174,95 +179,123 @@ class ViewController: UIViewController {
             uzsField.text = ""
         }
     }
+    
+    @objc func rubChangeField(){
+        // delete 0
         
-        @objc func rubChangeField(){
-            // delete 0
+        if let valueUSD = Double(rubField.text!){
             
-                
-            if let valueUSD = Double(rubField.text!){
-                
             let usdResult = valueUSD / rub
             let uzsResult = (uzs / rub) * valueUSD
             
             usdField.text = formatted.string(from: usdResult as NSNumber)
             uzsField.text = formatted.string(from: uzsResult as NSNumber)
-            }
-            else {
-                usdField.text = ""
-                rubField.text = ""
-                uzsField.text = ""
-            }
         }
+        else {
+            usdField.text = ""
+            rubField.text = ""
+            uzsField.text = ""
+        }
+    }
+    
+    @objc func uzsChangeField(){
+        if let valueUSD = Double(uzsField.text!){
+            let usdResult = valueUSD / uzs
+            let rubResult = (rub / uzs) * valueUSD
             
-            @objc func uzsChangeField(){
-                if let valueUSD = Double(uzsField.text!){
-                let usdResult = valueUSD / uzs
-                let rubResult = (rub / uzs) * valueUSD
-                
-                usdField.text = formatted.string(from: usdResult as NSNumber)
-                rubField.text = formatted.string(from: rubResult as NSNumber)
-                }
-                else {
-                    usdField.text = ""
-                    rubField.text = ""
-                    uzsField.text = ""
-                }
-            }
-    
-    
-    
-    
-    
-    
-    
+            usdField.text = formatted.string(from: usdResult as NSNumber)
+            rubField.text = formatted.string(from: rubResult as NSNumber)
+        }
+        else {
+            usdField.text = ""
+            rubField.text = ""
+            uzsField.text = ""
+        }
+    }
     
     func downloadJSON(checkCurrency:String) {
         
         let semaphore = DispatchSemaphore (value: 0)
-
+        
         let url = "https://api.apilayer.com/exchangerates_data/convert?to=\(checkCurrency)&from=USD&amount=1"
         var request = URLRequest(url: URL(string: url)!,timeoutInterval: Double.infinity)
         request.httpMethod = "GET"
         request.addValue("Ua5aTsmx620FBfKSF96pnj2U0fsUFnlE", forHTTPHeaderField: "apikey")
-
+        
         let task = URLSession.shared.dataTask(with: request) { [self] data, response, error in
-          guard let data = data else {
-            print(String(describing: error))
-            return
-          }
-         // print(String(data: data, encoding: .utf8)!)
+            guard let data = data else {
+                print(String(describing: error))
+                return
+            }
+            // print(String(data: data, encoding: .utf8)!)
             do {
                 let currencyDataa = try JSONDecoder().decode(structJson.self, from: data)
                 self.currencyData = [currencyDataa]
-                }catch {
-                        print("json Error")
-                        }
-          semaphore.signal()
+            }catch {
+                print("json Error")
+            }
+            semaphore.signal()
         }
-
+        
         task.resume()
         semaphore.wait()
     }
     
     @objc func clearValueButtonAction(){
         
-        if usdField.isEditing {
-            usdField.text?.removeAll()
-        } else if rubField.isEditing {
-            rubField.text?.removeAll()
-        } else if uzsField.isEditing {
-            uzsField.text?.removeAll()
-        }
+        usdField.text = ""
+        rubField.text = ""
+        uzsField.text = ""
     }
     
     @objc func deleteValueButtonAction(){
         
+        guard usdField.text != "" && rubField.text != "" && uzsField.text != "" else {return}
+        
         if usdField.isEditing {
             usdField.text?.removeLast()
+            if let valueUSD = Double(usdField.text!){
+                let rubResult = rub * valueUSD
+                let uzsResult = uzs * valueUSD
+                
+                
+                rubField.text = formatted.string(from:rubResult as NSNumber)
+                uzsField.text = formatted.string(from: uzsResult as NSNumber)
+            }
+            else {
+                usdField.text = ""
+                rubField.text = ""
+                uzsField.text = ""
+            }
         } else if rubField.isEditing {
             rubField.text?.removeLast()
+            if let valueUSD = Double(rubField.text!){
+                
+                let usdResult = valueUSD / rub
+                let uzsResult = (uzs / rub) * valueUSD
+                
+                usdField.text = formatted.string(from: usdResult as NSNumber)
+                uzsField.text = formatted.string(from: uzsResult as NSNumber)
+            }
+            else {
+                usdField.text = ""
+                rubField.text = ""
+                uzsField.text = ""
+            }
         } else if uzsField.isEditing {
             uzsField.text?.removeLast()
+            if let valueUSD = Double(uzsField.text!){
+                let usdResult = valueUSD / uzs
+                let rubResult = (rub / uzs) * valueUSD
+                
+                usdField.text = formatted.string(from: usdResult as NSNumber)
+                rubField.text = formatted.string(from: rubResult as NSNumber)
+            }
+            else {
+                usdField.text = ""
+                rubField.text = ""
+                uzsField.text = ""
+            }
         }
     }
     
@@ -275,6 +308,9 @@ class ViewController: UIViewController {
             let button = UIButton()
             button.setTitle(String(i), for: .normal)
             button.titleLabel?.font = UIFont.init(name: (button.titleLabel?.font.fontName)!, size: 33)
+//            button.setTitleColor(.orange, for: .normal)
+            button.addTarget(self, action: #selector(numbersButtonAction(_:)), for: .touchUpInside)
+            
             view.addSubview(button)
             
             button.translatesAutoresizingMaskIntoConstraints = false
@@ -310,6 +346,103 @@ class ViewController: UIViewController {
                 leftButtons = leftButtons + widthButtons + 20
                 
                 
+            }
+        }
+        
+        
+    }
+    
+    @objc func numbersButtonAction(_ sender:UIButton){
+        
+        guard let valueNumber = sender.titleLabel?.text else { return }
+        
+        if usdField.isEditing {
+            usdField.text? += valueNumber
+            if let valueUSD = Double(usdField.text!){
+                let rubResult = rub * valueUSD
+                let uzsResult = uzs * valueUSD
+                
+                rubField.text = formatted.string(from:rubResult as NSNumber)
+                uzsField.text = formatted.string(from: uzsResult as NSNumber)
+            }
+            else {
+                usdField.text = ""
+                rubField.text = ""
+                uzsField.text = ""
+            }
+        } else if rubField.isEditing {
+            rubField.text? += valueNumber
+            if let valueUSD = Double(rubField.text!){
+                
+                let usdResult = valueUSD / rub
+                let uzsResult = (uzs / rub) * valueUSD
+                
+                usdField.text = formatted.string(from: usdResult as NSNumber)
+                uzsField.text = formatted.string(from: uzsResult as NSNumber)
+            }
+            else {
+                usdField.text = ""
+                rubField.text = ""
+                uzsField.text = ""
+            }
+        } else if uzsField.isEditing {
+            uzsField.text? += valueNumber
+            if let valueUSD = Double(uzsField.text!){
+                let usdResult = valueUSD / uzs
+                let rubResult = (rub / uzs) * valueUSD
+                
+                usdField.text = formatted.string(from: usdResult as NSNumber)
+                rubField.text = formatted.string(from: rubResult as NSNumber)
+            }
+            else {
+                usdField.text = ""
+                rubField.text = ""
+                uzsField.text = ""
+            }
+        }
+        
+    }
+    
+    func refreshCurrencyInformation(){
+        if usdField.isEditing {
+            if let valueUSD = Double(usdField.text!){
+                let rubResult = rub * valueUSD
+                let uzsResult = uzs * valueUSD
+                
+                rubField.text = formatted.string(from:rubResult as NSNumber)
+                uzsField.text = formatted.string(from: uzsResult as NSNumber)
+            }
+            else {
+                usdField.text = ""
+                rubField.text = ""
+                uzsField.text = ""
+            }
+        } else if rubField.isEditing {
+            if let valueUSD = Double(rubField.text!){
+                
+                let usdResult = valueUSD / rub
+                let uzsResult = (uzs / rub) * valueUSD
+                
+                usdField.text = formatted.string(from: usdResult as NSNumber)
+                uzsField.text = formatted.string(from: uzsResult as NSNumber)
+            }
+            else {
+                usdField.text = ""
+                rubField.text = ""
+                uzsField.text = ""
+            }
+        } else if uzsField.isEditing {
+            if let valueUSD = Double(uzsField.text!){
+                let usdResult = valueUSD / uzs
+                let rubResult = (rub / uzs) * valueUSD
+                
+                usdField.text = formatted.string(from: usdResult as NSNumber)
+                rubField.text = formatted.string(from: rubResult as NSNumber)
+            }
+            else {
+                usdField.text = ""
+                rubField.text = ""
+                uzsField.text = ""
             }
         }
     }
